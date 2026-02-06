@@ -1,0 +1,6 @@
+registration:
+  emailAddress:
+ingress:
+  className:
+selfsigned:
+  enabled: false

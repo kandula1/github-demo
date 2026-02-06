@@ -1,0 +1,14 @@
+# https://github.com/bitnami/charts/blob/main/bitnami/keycloak/values.yaml
+# https://hub.docker.com/r/bitnami/keycloak/
+keycloak:
+  auth: {}
+    # adminPassword: Admin1234
+    # existingSecret: keycloak-credentials
+    # passwordSecretKey: admin-password
+  # production: false
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations: {}
+      # cert-manager.io/cluster-issuer: letsencrypt-prod
+    tls: true

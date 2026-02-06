@@ -1,0 +1,111 @@
+frontend:
+  enabled: true
+  host: front.random.ecorp.demo
+  name: ecorp-frontend
+  image: docker.io/devprofr/ecorp-frontend-demo
+  tag: 1.0.677411621
+  replicaCount: 1
+  healthEndpoint: /
+  additionalPodLabels: {}
+  env: {}
+  tls: {}
+    # secretName: chart-example-tls
+  resources: {}
+    # limits:
+    #   cpu: 200m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 64Mi
+  nodeAffinity: {}
+
+backend:
+  enabled: true
+  host: back.random.ecorp.demo
+  name: ecorp-backend
+  image: docker.io/devprofr/ecorp-backend-demo
+  tag: 1.0.641443181
+  replicaCount: 2
+  healthEndpoint: /health
+  env:
+    - name: Application__IsHttpsRedirectionEnabled
+      value: "false"
+    - name: Application__IsOpenTelemetryEnabled
+      value: "false"
+    - name: Application__IsSwaggerEnabled
+      value: "true"
+    - name: Logging__LogLevel__Default
+      value: "Information"
+    - name: Logging__LogLevel__Microsoft__AspNetCore
+      value: "Information"
+    - name: Logging__LogLevel__System
+      value: "Information"
+    - name: Logging__LogLevel__Ecorp
+      value: "Debug"
+    - name: OpenApi__Title
+      value: "E Corp Backend Demo (REST API)"
+    - name: OpenTelemetry__ServiceName
+      value: "EcorpBackendDemo"
+  ingressExtraHosts:
+    # needed for calls from frontend (needs manual update of hosts file and go to swagger page to accept invalid certificate)
+    - host: back.ecorp.demo
+      paths:
+        - path: /
+          pathType: Prefix
+  additionalPodLabels: {}
+  tls: {}
+  resources: {}
+  nodeAffinity: {}
+
+nodejsApi:
+  enabled: false
+  host: nodejs-api.random.ecorp.demo
+  name: ecorp-nodejs-api
+  image: docker.io/devprofr/ecorp-nodejsdemo-api
+  tag: 1.0.3787896716
+  replicaCount: 1
+  healthEndpoint: /health
+  additionalPodLabels:
+    rabbitmq-client: "true"
+  env:
+    - name: PORT
+      value: "80"
+    # - name: RABBITMQ_URL
+    #   value: "amqp://<user>:<password>@rabbitmq.rabbitmq.svc.cluster.local:5672"
+  tls: {}
+  resources: {}
+  nodeAffinity: {}
+
+legacy:
+  enabled: false
+  host: legacy.random.ecorp.demo
+  name: ecorp-legacy
+  image: docker.io/devprofr/winsamplenet48mvcwebapp
+  tag: 1.0.12886370230
+  replicaCount: 1
+  healthEndpoint: /
+  livenessProbeConfig:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    failureThreshold: 3
+  readinessProbeConfig:
+    initialDelaySeconds: 60
+    periodSeconds: 15
+    failureThreshold: 3
+  env: {}
+  tls: {}
+  resources: {}
+  nodeAffinity:
+    os: windows
+
+aspnetcore:
+  environment: Production
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+
+otelCollector:
+  endpoint: "http://otel-svc:4317"

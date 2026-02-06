@@ -1,0 +1,42 @@
+{{- $name := $.Values.name -}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  labels:
+    app: {{ $name }}
+    app.kubernetes.io/name: {{ $name }}
+spec:
+  replicas: {{ $.Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: {{ $name }}
+      app.kubernetes.io/name: {{ $name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $name }}
+        app.kubernetes.io/name: {{ $name }}
+    spec:
+      containers:
+        - name: webapp
+          image: "{{ $.Values.image }}:{{ $.Values.tag }}"
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: {{ $.Values.containerPort }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      restartPolicy: Always
